@@ -1,0 +1,11 @@
+requests
+bs4
+click
+pytest
+psycopg2-binary
+Flask-Script
+Flask-SQLAlchemy
+alembic>=1.7.6
+Flask-Migrate
+flask
+
