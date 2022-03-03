@@ -1,5 +1,6 @@
 from src.adapters.indeed_client import *
-from src.models.position import Position
+import src.models as models
+from src import db
 import requests
 import re
 import pdb
@@ -11,24 +12,41 @@ class IndeedAdapter:
         self.company_name = None
         
         
-    def run(self):
+    def pull_data(self):
         self.get_spans()
-        id = self.get_id()
-        title = self.get_title()
-        salaries = self.get_salaries()
-        description = self.get_description()
-        location = self.get_location()
-        city, state = self.get_city_state()
-        company_name = self.get_company_name()
-        position = Position(id, title, salaries, description, city, state, company_name, location_text = self.location_text, remote = self.remote)
+        self.source_id = self.get_source_id()
+        self.title = self.get_title()
+        self.salaries = self.get_salaries()
+        self.description = self.get_description()
+        self.location = self.get_location()
+        self.city, self.state = self.get_city_state()
+        self.company_name = self.get_company_name()
+
+    def build_models(self):
+        company = self.build_company()
+        position = self.build_position()
+        state = self.build_state()
+        # build_state
+        pass
+
+    def build_company(self):
+        company = self.get_or_build(db, models.Company, name=self.company_name)
+        return company
+
+    def build_position(self):
+        position = self.get_or_build(db, models.Position, source_id=self.source_id)
         return position
+
+    def build_state(self):
+        state = self.get_or_build(db, models.State, name=self.name)
+        return state
         
 
     def get_spans(self):
         self.spans = self.spans or self.card.findAll('span')
         return self.spans
 
-    def get_id(self):
+    def get_source_id(self):
         self.id = self.card['data-jk']
         return self.id
 
@@ -50,7 +68,6 @@ class IndeedAdapter:
         return self.description
 
     def get_location(self):
-        
         location = self.card.find('div', {"class": "companyLocation"}).text.lower()
         self.location_text = location
         self.remote = 'remote' in location
@@ -64,9 +81,10 @@ class IndeedAdapter:
         split_text = location.split(', ')
         if len(split_text) > 1:
             city, state = split_text
-            self.city = city.split(' ')[-1].capitalize()
-            self.state = state.split(' ')[0].upper()
-            
+            city_text = city.split(' ')[-1]
+            self.city = " ".join(re.findall("[a-zA-Z]+", city_text)).capitalize()
+            state_text = state.split(' ')[0]
+            self.state = " ".join(re.findall("[a-zA-Z]+", state_text)).upper()
             return (self.city, self.state)
         else: 
             return ('NA', 'NA')
@@ -74,6 +92,15 @@ class IndeedAdapter:
     def get_company_name(self):
         self.company_name = self.company_name or self.card.find_all('span', {"class": "companyName"})[0].text
         return self.company_name
+
+    def get_or_build(db, model, **kwargs):
+        instance = db.session.query(model).filter_by(**kwargs).first()
+        if instance:
+            return instance
+        else:
+            instance = model(**kwargs)
+            db.session.add(instance)
+            return instance
         
 
     

@@ -5,11 +5,18 @@ pip3 install -r requirements.txt
 
 
 # generate the database
+
 export FLASK_APP=src/__init__.py
 create database career_scraper;
 python3 -m flask db init
 python3 flask db migrate -m "Initial migration."
 
+
+For querying see the following
+https://flask-sqlalchemy.palletsprojects.com/en/2.x/quickstart/
+
+
+See flask db library -> https://flask-migrate.readthedocs.io/en/latest/
 # position
 # company
 # skills

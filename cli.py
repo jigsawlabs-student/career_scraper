@@ -17,7 +17,6 @@ def scrape_jobs(index = 0, position = 'data engineer'):
     cards = get_job_cards(index, position = 'data engineer', location = 'United States', start = 0)
     print(cards)
 
-
 @cli_tools.command(name='get_card', help='help scrape_jobs')
 @click.option('--id', default='0601c9a2ee3bd7d2', help='test option')
 def get_card(id):

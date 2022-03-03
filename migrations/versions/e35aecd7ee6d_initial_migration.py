@@ -26,15 +26,13 @@ def upgrade():
     )
     op.create_table('states',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=128), nullable=False),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['id'], ['states.id'], ),
-    sa.ForeignKeyConstraint(['name'], ['states.name'], ),
-    sa.PrimaryKeyConstraint('id', 'name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('cities',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Integer(), nullable=True),
+    sa.Column('name', sa.String(length=128), nullable=True),
     sa.Column('state_id', sa.Integer(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['state_id'], ['states.id'], ),
