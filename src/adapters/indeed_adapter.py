@@ -5,6 +5,8 @@ import requests
 import re
 import pdb
 
+from src.models import position_location
+
 class IndeedAdapter:
     def __init__(self, card):
         self.card = card
@@ -23,11 +25,31 @@ class IndeedAdapter:
         self.company_name = self.get_company_name()
 
     def build_models(self):
-        company = self.build_company()
         position = self.build_position()
-        state = self.build_state()
-        # build_state
-        pass
+        if not position.id:
+            company = self.build_company()
+            state = self.build_state()
+            city = self.build_city()
+            position_location = self.build_position_location(position, city,
+             state, self.remote)
+            company.positions.append(position)
+            position.position_locations.append(position_location)
+            db.session.commit()
+        return position
+            
+
+
+    def build_position_location(self, position, city, state, remote):
+        position_location = models.PositionLocation()
+        position_location.position = position
+        position_location.city = city
+        position_location.state = state
+        position_location.is_remote = remote
+        
+        
+    def build_city(self):
+        city = self.get_or_build(db, models.City, name=self.city)
+        return city
 
     def build_company(self):
         company = self.get_or_build(db, models.Company, name=self.company_name)
