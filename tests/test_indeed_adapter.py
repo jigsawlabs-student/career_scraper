@@ -1,6 +1,10 @@
 from bs4 import BeautifulSoup as bs
-from src.adapters.indeed_adapter import *
+from src.adapters.position_builder import *
+import src.models as models
 import pdb
+import pytest
+
+from src import create_app
 
 html_doc = """<a class="tapItem fs-unmask result job_47cc223fdaec3b16 resultWithShelf sponTapItem desktop" data-hide-spinner="true" data-hiring-event="false" data-jk="47cc223fdaec3b16" data-mobtk="1fsp164p6u1up801" href="/rc/clk?jk=47cc223fdaec3b16&amp;fccid=3ed0572c448b2368&amp;vjs=3" id="job_47cc223fdaec3b16" rel="nofollow" target="_blank"><div class="slider_container"><div class="slider_list"><div class="slider_item"><div class="job_seen_beacon"><table cellpadding="0" cellspacing="0" class="jobCard_mainContent big6_visualChanges" role="presentation"><tbody><tr><td class="resultContent"><div class="heading4 color-text-primary singleLineTitle tapItem-gutter"><h2 class="jobTitle jobTitle-color-purple"><span title="Data Engineer">Data Engineer</span></h2></div><div class="heading6 company_location tapItem-gutter companyInfo"><span class="companyName"><a class="turnstileLink companyOverviewLink" data-tn-element="companyName" href="/cmp/Intone-Networks" rel="noopener" target="_blank">Intone Networks</a></span><span class="ratingsDisplay withRatingLink"><a aria-label="Company rating 4.2 out of 5 stars" class="ratingLink" data-tn-variant="cmplinktst2" href="/cmp/Intone-Networks/reviews" rel="noopener" target="_blank" title="Intone Networks reviews"><span aria-label="4.2 of stars rating" class="ratingNumber" role="img"><span aria-hidden="true">4.2</span><svg aria-hidden="true" class="starIcon" fill="none" height="12" role="presentation" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.8709L12.4542 15.5593C12.7807 15.7563 13.1835 15.4636 13.0968 15.0922L11.9148 10.0254L15.8505 6.61581C16.1388 6.36608 15.9847 5.89257 15.6047 5.86033L10.423 5.42072L8.39696 0.640342C8.24839 0.289808 7.7516 0.289808 7.60303 0.640341L5.57696 5.42072L0.395297 5.86033C0.015274 5.89257 -0.13882 6.36608 0.149443 6.61581L4.0852 10.0254L2.90318 15.0922C2.81653 15.4636 3.21932 15.7563 3.54584 15.5593L8 12.8709Z" fill="#767676"></path></svg></span></a></span><div class="companyLocation"><span class="more_loc_container"><a aria-label="Same Data Engineer job in 2 other locations" class="more_loc" href="/addlLoc/redirect?tk=1fsp164p6u1up801&amp;jk=47cc223fdaec3b16&amp;dest=%2Fjobs%3Fq%3Ddata%2Bengineer%26l%3DUnited%2BStates%26explvl%3Dentry_level%26grpKey%3D8gcGdG5mdGNsuA%252BDqogBqhAaCglub3JtdGl0bGUaDWRhdGEgZW5naW5lZXI%253D" rel="nofollow">+2 locations</a></span><span>Remote</span></div></div><div class="heading6 tapItem-gutter metadataContainer noJEMChips salaryOnly"><div class="metadata"><div class="attribute_snippet"><svg aria-hidden="true" aria-label="Job type" fill="none" height="13" role="presentation" viewbox="0 0 14 13" width="14" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M4.50226.5c-.27614 0-.5.223858-.5.5v2.1H.5c-.276142 0-.5.22386-.5.5v1.9h14V3.6c0-.27614-.2239-.5-.5-.5h-3.4977V1c0-.276142-.22389-.5-.50004-.5h-5Zm4.19962 2.6H5.30344V1.8h3.39844v1.3Z" fill="#595959" fill-rule="evenodd"></path><path d="M5.70117 6.80005H0v5.20005c0 .2761.223857.5.5.5h13c.2761 0 .5-.2239.5-.5V6.80005H8.30117v.80322c0 .27614-.22386.5-.5.5h-1.6c-.27614 0-.5-.22386-.5-.5v-.80322Z" fill="#595959"></path></svg>Contract</div></div></div><div class="heading6 error-text tapItem-gutter"></div></td></tr></tbody></table><table class="jobCardShelfContainer big6_visualChanges" role="presentation"><tbody><tr class="jobCardShelf"></tr><tr class="underShelfFooter"><td><div class="heading6 tapItem-gutter result-footer"><div class="job-snippet"><ul style="list-style-type:circle;margin-top: 0px;margin-bottom: 0px;padding-left:20px;">
 <li>SAP- First priority Informatica ICCS- 2nd Priority AWS Moving <b>data</b> from NetSuite to Redsuit.</li>
@@ -16,48 +20,76 @@ converse_job = """<a class="tapItem fs-unmask result job_f59aef6085566bb4 result
 html_doc = bs(converse_job, 'html.parser')
 card = html_doc.find('a')
 
+import contextlib
+from sqlalchemy import MetaData
+
+def drop_all():
+    models.PositionLocation.query.delete()
+    models.Position.query.delete()
+    models.Company.query.delete()
+    models.State.query.delete()
+    models.City.query.delete()
+
+@pytest.fixture
+def setUp():
+    db_name = "postgresql://postgres:postgres@localhost/career_scraper_test"
+    flask_app = create_app(db_name)
+    with flask_app.app_context():
+        
+        drop_all()
+        yield flask_app
+
+        drop_all()
+
 def test_get_id_gets_id():
-    indeed_adapter = IndeedAdapter(card)
-    id = indeed_adapter.get_id()
+    indeed_adapter = PositionBuilder(card)
+    id = indeed_adapter.get_source_id()
     assert id == "f59aef6085566bb4"
 
 def test_get_title():
-    indeed_adapter = IndeedAdapter(card)
+    indeed_adapter = PositionBuilder(card)
     assert indeed_adapter.get_title() == "Data Engineer"
 
 def test_get_salaries():
-    indeed_adapter = IndeedAdapter(card)
+    indeed_adapter = PositionBuilder(card)
     return indeed_adapter.get_salaries()
 
 def test_get_description():
-    indeed_adapter = IndeedAdapter(card)
-    # description = indeed_adapter.get_description()
-    test_desc = '<p>Data Reporting Engineering Contractor, you will work with the data-engineering team to build and enhance partner and client reports using pyspark, spark/scala, and AWS EMR, S3, and snowflake. Includes Development, testing, and validatio</p><p>Job Type: Full-time</p><p>Salary: Up to $180,000.00 per year</p><p>Schedule:</p><ul><li>8 hour shift</li></ul><p>Work Remotely:</p><ul><li>Yes</li></ul>'
+    indeed_adapter = PositionBuilder(card)
+    description = indeed_adapter.get_description()
+    
+    test_desc = "<div><div><p>Become part of the Converse Team</p><p>\nConverse is a place to explore potential, break barriers and push out the edges of what can be. The company looks for people who can grow, think, dream and create. Its culture thrives by embracing diversity and rewarding imagination. The brand seeks achievers, leaders and visionaries. At Converse, it&rsquo;s about each person bringing skills and passion to a challenging and constantly evolving world to make things better as a team.</p><p>\nWe Need Someone Who Speaks Computer</p><p>\nComputers have their own language. Which most of us don&rsquo;t speak. But you do. And we need your fluency. Let&rsquo;s face it. The modern world is shackled to computers so we need experts like yourself to keep us running. So come join our crew. You don&rsquo;t have to call yourself The Computer Whisperer but we might.</p></div><div>\nWHO WE ARE LOOKING FOR\n<p>By joining the Converse Technology team, you will be a strategic partner that collaboratively delivers enterprise value and innovation. We will rely on you to bring your whole self to work and you can expect in return an environment that fosters growth by challenging and inspiring you to lead in your space.</p>\n<p>As the demand for technology continues to evolve, we seek individuals who bring a unique perspective and new ways of thinking to elevate the brand&rsquo;s potential. Our team leverages a diverse set of backgrounds and skills to create and iterate on technical solutions that drive growth for our business. We work cross-functionally within the enterprise to solve problems and bring creative solutions to life. Always connected by a bigger purpose, we keep the consumer at the center of everything we do.</p>\n<p>On the Converse Tech team, we seek individuals that have:</p>\n<ul><li>A solid understanding of our business; an understanding of how we create and move product, and how we serve customers</li>\n<li>An agile mindset; familiarity with delivery within an agile framework</li>\n<li>The ability to communicate effectively with technical and non-technical business partners</li>\n<li>Technical literacy; a foundational understanding of critical technology concepts</li>\n<li>An analytical attitude; the ability to acquire, visualize and analyze data to inform decisions; The ability to formulate and test hypotheses</li>\n</ul>WHAT YOU WILL WORK ON\n<p>As a Data Engineer on the Enterprise Data &amp; Analytics team, you will play a key role in helping us deliver high quality data and analytics products to our business partners. In this role you will:</p>\n<ul><li>Understand our existing data &amp; analytics infrastructure and data pipelines so that you can help monitor data flows and diagnose/resolve issues</li>\n<li>Develop new data pipelines under the guidance of senior engineers. Develop data ingestion patterns in SQL and Python as well as orchestration using tools like Matillion and/or Airflow</li>\n<li>ELT and data model development based on requirements provided by Product Owners, under the guidance of senior engineers; Unit test all code to ensure quality; Develop comprehensive documentation, and ensure all code is saved to defined repositories</li>\n<li>Work in an agile model, delivering assigned stories as part of development sprints</li>\n<li>Effectively communicate the results of your work to Product Owners, users and stakeholders</li>\n<li>Participate in Engineering team meetings and contribute to the development of team standards and practices</li>\n<li>Continually learn new Data &amp; Analytics technologies and tools that are used either at Nike or in the broader industry</li>\n</ul></div><div>WHAT YOU BRING\n<ul><li>Bachelor's degree or higher in computer science, Software Engineering or related field or equivalent combination of education and experience.</li>\n<li>Strong SQL; Intermediate Python.</li>\n<li>Prior experience in an internship or university project delivering data/analytics outputs in a corporate environment.</li>\n<li>Passion for Data &amp; Analytics, and for learning new tools and technologies.</li>\n<li>Passion for contributing to a culture of diversity, inclusion and belonging.</li>\n<li>Understanding of data lake/data warehouse concepts, data modeling concepts.</li>\n<li>Familiarity with any cloud platform GCP, AWS, or Azure.</li>\n<li>Experience with AWS resources a plus (EC2, S3, SQS/SNS, Lambda)</li>\n<li>Understanding of agile concepts.</li>\n<li>Solid communication skills.</li>\n<li>Great teammate.</li>\n</ul>\n<p>Open to remote work, except cannot work in South Dakota, Vermont, and West Virginia. These candidates will be required to relocate.</p>\n<p>For employees based in Colorado, this position starts at $75,000.00 per year. Information about benefits can be found here.</p>\n<p>ENTRYLEADER: Be Empowered to Grow within Nike and Create the Future</p>\n</div><div><p>\nConverse requires all applicants for this position to be vaccinated for COVID-19 as a condition of hire, unless otherwise required by law. As an equal opportunity employer, Converse will make accommodations to individuals who cannot be vaccinated in accordance with applicable law.</p></div><div><p><br>\nConverse is more than a company; it&rsquo;s a worldwide advocate for self-expression. This belief motivates our employees, permeates our working environment and inspires our products. No two of us look or think exactly alike. We are each one-of-a-kind. Individually and as a culture, we have the freedom to create and grow professionally. Generous benefits packages only sweeten the experience. From Boston to Shanghai, from Brand Design to Finance, Converse is a brand that celebrates the unique and creative people of the world. Together, we&rsquo;re different.</p></div></div>"
     assert description == test_desc
 
 def test_get_company_name():
-    indeed_adapter = IndeedAdapter(card)
+    indeed_adapter = PositionBuilder(card)
     assert indeed_adapter.get_company_name() == "Converse"
 
 def test_get_city_state():
-    indeed_adapter = IndeedAdapter(card)
+    indeed_adapter = PositionBuilder(card)
     city, state = indeed_adapter.get_city_state()
     assert city == 'Boston'
     assert state == 'MA'
 
-def test_run_adapter():
-    indeed_adapter = IndeedAdapter(card)
-    # position = indeed_adapter.run()
-    obj_keys = ['id', 'title', 'salaries', 'description', 'city', 'state',
-     'company_name', 'location_text', 'remote']
-    obj_vals = ['0601c9a2ee3bd7d2', 'Data Engineer', [75000], 
-    '<p>Data Reporting Engineering Contractor, you will work with the data-engineering team to build and enhance partner and client reports using pyspark, spark/scala, and AWS EMR, S3, and snowflake. Includes Development, testing, and validatio</p><p>Job Type: Full-time</p><p>Salary: Up to $180,000.00 per year</p><p>Schedule:</p><ul><li>8 hour shift</li></ul><p>Work Remotely:</p><ul><li>Yes</li></ul>',
-     'Boston', 'MA', 'Spanidea Systemms']
-    vals = list(vars(position).values())
-    keys = list(vars(position).keys())
-    assert obj_keys == keys
-    assert obj_vals == vals
+def test_run_adapter(setUp):
+    indeed_adapter = PositionBuilder(card)
+    indeed_adapter.pull_data()
+    
+    position = indeed_adapter.build_models()
+    assert position.source_id == 'f59aef6085566bb4'
+    assert position.title == 'Data Engineer'
+    test_desc = "<div><div><p>Become part of the Converse Team</p><p>\nConverse is a place to explore potential, break barriers and push out the edges of what can be. The company looks for people who can grow, think, dream and create. Its culture thrives by embracing diversity and rewarding imagination. The brand seeks achievers, leaders and visionaries. At Converse, it&rsquo;s about each person bringing skills and passion to a challenging and constantly evolving world to make things better as a team.</p><p>\nWe Need Someone Who Speaks Computer</p><p>\nComputers have their own language. Which most of us don&rsquo;t speak. But you do. And we need your fluency. Let&rsquo;s face it. The modern world is shackled to computers so we need experts like yourself to keep us running. So come join our crew. You don&rsquo;t have to call yourself The Computer Whisperer but we might.</p></div><div>\nWHO WE ARE LOOKING FOR\n<p>By joining the Converse Technology team, you will be a strategic partner that collaboratively delivers enterprise value and innovation. We will rely on you to bring your whole self to work and you can expect in return an environment that fosters growth by challenging and inspiring you to lead in your space.</p>\n<p>As the demand for technology continues to evolve, we seek individuals who bring a unique perspective and new ways of thinking to elevate the brand&rsquo;s potential. Our team leverages a diverse set of backgrounds and skills to create and iterate on technical solutions that drive growth for our business. We work cross-functionally within the enterprise to solve problems and bring creative solutions to life. Always connected by a bigger purpose, we keep the consumer at the center of everything we do.</p>\n<p>On the Converse Tech team, we seek individuals that have:</p>\n<ul><li>A solid understanding of our business; an understanding of how we create and move product, and how we serve customers</li>\n<li>An agile mindset; familiarity with delivery within an agile framework</li>\n<li>The ability to communicate effectively with technical and non-technical business partners</li>\n<li>Technical literacy; a foundational understanding of critical technology concepts</li>\n<li>An analytical attitude; the ability to acquire, visualize and analyze data to inform decisions; The ability to formulate and test hypotheses</li>\n</ul>WHAT YOU WILL WORK ON\n<p>As a Data Engineer on the Enterprise Data &amp; Analytics team, you will play a key role in helping us deliver high quality data and analytics products to our business partners. In this role you will:</p>\n<ul><li>Understand our existing data &amp; analytics infrastructure and data pipelines so that you can help monitor data flows and diagnose/resolve issues</li>\n<li>Develop new data pipelines under the guidance of senior engineers. Develop data ingestion patterns in SQL and Python as well as orchestration using tools like Matillion and/or Airflow</li>\n<li>ELT and data model development based on requirements provided by Product Owners, under the guidance of senior engineers; Unit test all code to ensure quality; Develop comprehensive documentation, and ensure all code is saved to defined repositories</li>\n<li>Work in an agile model, delivering assigned stories as part of development sprints</li>\n<li>Effectively communicate the results of your work to Product Owners, users and stakeholders</li>\n<li>Participate in Engineering team meetings and contribute to the development of team standards and practices</li>\n<li>Continually learn new Data &amp; Analytics technologies and tools that are used either at Nike or in the broader industry</li>\n</ul></div><div>WHAT YOU BRING\n<ul><li>Bachelor's degree or higher in computer science, Software Engineering or related field or equivalent combination of education and experience.</li>\n<li>Strong SQL; Intermediate Python.</li>\n<li>Prior experience in an internship or university project delivering data/analytics outputs in a corporate environment.</li>\n<li>Passion for Data &amp; Analytics, and for learning new tools and technologies.</li>\n<li>Passion for contributing to a culture of diversity, inclusion and belonging.</li>\n<li>Understanding of data lake/data warehouse concepts, data modeling concepts.</li>\n<li>Familiarity with any cloud platform GCP, AWS, or Azure.</li>\n<li>Experience with AWS resources a plus (EC2, S3, SQS/SNS, Lambda)</li>\n<li>Understanding of agile concepts.</li>\n<li>Solid communication skills.</li>\n<li>Great teammate.</li>\n</ul>\n<p>Open to remote work, except cannot work in South Dakota, Vermont, and West Virginia. These candidates will be required to relocate.</p>\n<p>For employees based in Colorado, this position starts at $75,000.00 per year. Information about benefits can be found here.</p>\n<p>ENTRYLEADER: Be Empowered to Grow within Nike and Create the Future</p>\n</div><div><p>\nConverse requires all applicants for this position to be vaccinated for COVID-19 as a condition of hire, unless otherwise required by law. As an equal opportunity employer, Converse will make accommodations to individuals who cannot be vaccinated in accordance with applicable law.</p></div><div><p><br>\nConverse is more than a company; it&rsquo;s a worldwide advocate for self-expression. This belief motivates our employees, permeates our working environment and inspires our products. No two of us look or think exactly alike. We are each one-of-a-kind. Individually and as a culture, we have the freedom to create and grow professionally. Generous benefits packages only sweeten the experience. From Boston to Shanghai, from Brand Design to Finance, Converse is a brand that celebrates the unique and creative people of the world. Together, we&rsquo;re different.</p></div></div>"
+    assert position.description == test_desc
+    assert position.minimum_salary == 75000
+    assert position.maximum_salary == 75000
+    assert position.company.name == 'Converse'
+    assert position.position_locations[0].city.name == 'Boston'
+    assert position.position_locations[0].state.name == 'MA'
+    
+    assert position.id
+    assert position.position_locations[0].id
+    assert position.position_locations[0].city.id
+    assert position.position_locations[0].state.id
     
     
-
-
+    
