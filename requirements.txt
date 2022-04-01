@@ -8,4 +8,5 @@ Flask-SQLAlchemy
 alembic>=1.7.6
 Flask-Migrate
 flask
-
+spacy
+en_core_web_sm

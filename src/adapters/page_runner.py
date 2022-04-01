@@ -34,7 +34,7 @@ class PageRunner():
         for card in cards:
             builder = PositionBuilder(card)
             position = builder.run()
-            position.query = query
+            position.query_string = query
                 
             db.session.add(position)
             positions.append(position)

@@ -28,5 +28,5 @@ db_url = "postgresql://postgres:postgres@localhost/career_scraper"
 app = create_app(db_url)
 app.app_context().push()
 
-# runner = ScrapingRunner()
+runner = ScrapingRunner()
 # runner.run_scraping(position = 'data engineer', location = 'nyc', experience_level = 'entry_level')

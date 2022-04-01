@@ -14,7 +14,7 @@ class ScrapingRunner():
             return page_num
 
     def run_scraping(self, position, location, experience_level):
-        scraping = Scraping(query = position, location = location,
+        scraping = Scraping(query_string = position, location = location,
          experience_level = experience_level)
         db.session.add(scraping)
         self.scraping = scraping

@@ -18,7 +18,7 @@ class Position(db.Model):
     company_id = db.Column(db.Integer, db.ForeignKey('companies.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     date_posted = db.Column(db.DateTime)
-    query = db.Column(db.String)
+    query_string = db.Column(db.String)
 
     company = relationship("Company", back_populates="positions")
     card = relationship("Card", back_populates="position")

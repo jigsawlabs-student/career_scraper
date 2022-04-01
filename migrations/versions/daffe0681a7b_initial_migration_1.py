@@ -1,8 +1,8 @@
-"""Update migrations with card and pagescraper.
+"""Initial migration 1.
 
-Revision ID: bfe7b7972a3e
+Revision ID: daffe0681a7b
 Revises: 
-Create Date: 2022-03-09 17:26:49.898557
+Create Date: 2022-04-01 15:54:08.235984
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bfe7b7972a3e'
+revision = 'daffe0681a7b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,7 +26,7 @@ def upgrade():
     )
     op.create_table('scrapings',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('query', sa.String(length=128), nullable=True),
+    sa.Column('query_string', sa.String(length=128), nullable=True),
     sa.Column('location', sa.String(length=128), nullable=True),
     sa.Column('experience_level', sa.String(length=128), nullable=True),
     sa.Column('total_jobs', sa.Integer(), nullable=True),
@@ -52,6 +52,7 @@ def upgrade():
     sa.Column('html', sa.Text(), nullable=True),
     sa.Column('page_number', sa.Integer(), nullable=True),
     sa.Column('scraping_id', sa.Integer(), nullable=True),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['scraping_id'], ['scrapings.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -60,6 +61,7 @@ def upgrade():
     sa.Column('source_id', sa.String(), nullable=True),
     sa.Column('html', sa.Text(), nullable=True),
     sa.Column('scraped_page_id', sa.Integer(), nullable=True),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['scraped_page_id'], ['scraped_pages.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -71,8 +73,12 @@ def upgrade():
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('minimum_salary', sa.Integer(), nullable=True),
     sa.Column('maximum_salary', sa.Integer(), nullable=True),
+    sa.Column('minimum_experience', sa.Integer(), nullable=True),
+    sa.Column('maximum_experience', sa.Integer(), nullable=True),
     sa.Column('company_id', sa.Integer(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.Column('date_posted', sa.DateTime(), nullable=True),
+    sa.Column('query_string', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['card_id'], ['cards.id'], ),
     sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
     sa.PrimaryKeyConstraint('id')

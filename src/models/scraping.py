@@ -6,7 +6,7 @@ class Scraping(db.Model):
     __tablename__ = 'scrapings'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    query = db.Column(db.String(128))
+    query_string = db.Column(db.String(128))
     location = db.Column(db.String(128))
     experience_level = db.Column(db.String(128))
     total_jobs = db.Column(db.Integer)
