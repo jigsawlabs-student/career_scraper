@@ -24,3 +24,12 @@ class Position(db.Model):
     card = relationship("Card", back_populates="position")
     
     position_locations = relationship("PositionLocation", back_populates="position")
+
+    # add skills query
+    
+    # @property
+    # def books(self):
+    #     query = Book.query.join(Shelf).join(Store).filter(Store.id == self.id)
+    #     return query.all()
+
+    

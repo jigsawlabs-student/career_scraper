@@ -3,7 +3,7 @@ from flask.cli import FlaskGroup
 import click
 from src import create_app, db
 
-dev_url = "postgresql://postgres:postgres@localhost/career_scraper"
+dev_url = "postgresql://postgres:postgres@localhost/test_career_scraper"
 app = create_app(dev_url)
 
 cli = FlaskGroup(app)

@@ -7,7 +7,10 @@ from src.models import *
 from src import db, create_app
 from src.adapters.scraping_runner import ScrapingRunner
 
+
 from sqlalchemy.ext.declarative import declarative_base
+
+import src.adapters.skill_builder as builder
 Base = declarative_base()
 
 def clear_data():
@@ -28,5 +31,5 @@ db_url = "postgresql://postgres:postgres@localhost/career_scraper"
 app = create_app(db_url)
 app.app_context().push()
 
-runner = ScrapingRunner()
-# runner.run_scraping(position = 'data engineer', location = 'nyc', experience_level = 'entry_level')
+# runner = ScrapingRunner()
+
