@@ -1,5 +1,6 @@
 from datetime import datetime
 from src import db
+import src.models as models
 
 from sqlalchemy.orm import relationship
 
@@ -27,9 +28,9 @@ class Position(db.Model):
 
     # add skills query
     
-    # @property
-    # def books(self):
-    #     query = Book.query.join(Shelf).join(Store).filter(Store.id == self.id)
-    #     return query.all()
+    @property
+    def skills(self):
+        query = models.Skill.query.join(models.PositionSkill).join(Position).filter(models.PositionSkill.position_id == self.id)
+        return query.all()
 
     

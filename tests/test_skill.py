@@ -1,10 +1,16 @@
 from bs4 import BeautifulSoup as bs
 from src.adapters.position_builder import *
+
 import src.models as models
 import pdb
 import pytest
 
 from src import create_app
+
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
+
+
 
 def drop_all():
     models.PositionLocation.query.delete()
