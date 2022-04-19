@@ -4,7 +4,6 @@ from src.models import Scraping, ScrapedPage
 from src import db
 
 class ScrapingRunner():
-
     def previous_page(self):
         last_scraping = db.session.query(ScrapedPage).filter(ScrapedPage.scraping_id ==
          self.scraping.id).order_by(ScrapedPage.timestamp.desc()).first()
@@ -13,19 +12,21 @@ class ScrapingRunner():
             page_num = last_scraping.page_number
             return page_num
 
-    def run_scraping(self, position, location, experience_level):
-        scraping = Scraping(query_string = position, location = location,
+    def run_scraping(self, job_title, location, experience_level):
+        
+        scraping = Scraping(query_string = job_title, 
+        location = location,
          experience_level = experience_level)
         db.session.add(scraping)
         self.scraping = scraping
         start = 0
         
         while scraping:
-            page_html = get_page(position, location, 
+            page_html = get_page(job_title, location, 
             experience_level = experience_level, start = start)
             page_runner = PageRunner(page_html)
             
-            scraped_page = page_runner.run(query = position)['scraped_page']
+            scraped_page = page_runner.run(query = job_title)['scraped_page']
             
             previous_page_num = self.previous_page()
             
@@ -35,7 +36,7 @@ class ScrapingRunner():
             print('current page', scraped_page.page_number, 'previous page', previous_page_num)
             
 
-    def page_scraper(position, location, start):
-        page = get_page(position, location, start)
+    def page_scraper(job_title, location, start):
+        page = get_page(job_title, location, start)
         # build scraped page
         # pass scraped page into page runner

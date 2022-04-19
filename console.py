@@ -2,15 +2,19 @@ from sqlalchemy import inspect
 
 from src.adapters.indeed_client import *
 from src.adapters.position_builder import *
+from src.adapters.position_skill_builder import *
 from src.adapters.page_runner import *
 from src.models import *
 from src import db, create_app
+from sqlalchemy import func
+from sqlalchemy.sql import text
 from src.adapters.scraping_runner import ScrapingRunner
-
+from settings import DB_USER, DB_PASSWORD, DB_HOST, DB_PASSWORD
 
 from sqlalchemy.ext.declarative import declarative_base
 
-import src.adapters.skill_builder as builder
+from src.adapters.seed_builder import *
+
 Base = declarative_base()
 
 def clear_data():
@@ -19,17 +23,12 @@ def clear_data():
     for tbl in reversed(meta.sorted_tables):
         engine.execute(tbl.delete())
 
-# cards = get_job_cards(position = 'data engineer', location = 'United States', start = 0)
-# first_card = cards[0]
-
-# state = State(name = 'New York')
-# new_york.cities.append(city)
-# db.session.add(new_york)
-# db.session.commit()
-    # both city and state now added
-db_url = "postgresql://postgres:postgres@localhost/career_scraper"
+db_url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/careers"
 app = create_app(db_url)
 app.app_context().push()
 
-# runner = ScrapingRunner()
+
+
+def build_skills_for_remaining_positions():
+    PositionSkillBuilder.build_skills_for_untagged_positions(db.session)
 

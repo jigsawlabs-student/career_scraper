@@ -1,4 +1,3 @@
-pip3 install -r requirements.txt
 `python3 manage.py get_card`
 
 
@@ -6,10 +5,7 @@ pip3 install -r requirements.txt
 
 # generate the database
 
-export FLASK_APP=manage.py
-create database career_scraper;
-python3 -m flask db init
-python3 -m flask db migrate -m "Initial migration."
+
 
 python3 -m spacy download en_core_web_lg
 
@@ -28,3 +24,15 @@ See flask db library -> https://flask-migrate.readthedocs.io/en/latest/
 # https://medium.datadriveninvestor.com/migrating-flask-script-to-flask-2-0-cli-4a5eee269139
 
 https://raw.githubusercontent.com/microsoft/SkillsExtractorCognitiveSearch/master/data/skills.json
+
+pip3 install -r requirements.txt
+
+export FLASK_APP=manage.py
+create database career_scraper;
+python3 -m flask db init
+python3 -m flask db migrate -m "Initial migration."
+
+python3 cli.py seed_skills
+python3 cli.py seed_job_titles
+
+python3 cli.py build_positions

@@ -20,11 +20,14 @@ class Position(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     date_posted = db.Column(db.DateTime)
     query_string = db.Column(db.String)
-
+    job_title_id = db.Column(db.Integer, db.ForeignKey('job_titles.id'))
+    job_title = relationship("JobTitle", back_populates="positions")
+    
     company = relationship("Company", back_populates="positions")
     card = relationship("Card", back_populates="position")
     
     position_locations = relationship("PositionLocation", back_populates="position")
+    position_skills = relationship("PositionSkill", back_populates="position")
 
     # add skills query
     

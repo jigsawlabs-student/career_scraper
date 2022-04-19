@@ -4,6 +4,8 @@ import src.models as models
 from src import create_app, db
 from tests.data.index import page
 
+from src.models import JobTitle
+
 
 import pytest
 
@@ -18,15 +20,12 @@ def cards():
         engine = db.engine
         db.drop_all()
         db.create_all()
-
+        jt = JobTitle(name = 'data engineer')
+        db.session.add(jt)
+        db.session.commit()
         page_runner = PageRunner(page_html = page)
         cards = page_runner.build_cards_from_html()
         yield cards
-
-        db.drop_all()
-        db.create_all()
-        
-
 
 def test_build_cards_from_html_fn(cards):
     assert len(cards) == 15
@@ -52,6 +51,12 @@ def test_build_positions_from(cards):
     first_position = positions[0]
     first_card = first_position.card
     assert first_position.company.name == first_card.get_company_name()
+
+def test_build_position_from_associates_the_job_title(cards):
+    page_runner = PageRunner(page_html = page)
+    positions = page_runner.build_positions_from(cards, 'data engineer')
+    first_position = positions[0]
+    assert first_position.job_title.name == 'data engineer'
     
 
 def test_does_not_build_an_extra_position_location(cards):

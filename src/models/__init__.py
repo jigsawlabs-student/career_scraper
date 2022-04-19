@@ -8,3 +8,4 @@ from src.models.scraping import Scraping
 from src.models.card import Card
 from src.models.skill import Skill
 from src.models.position_skill import PositionSkill
+from src.models.job_title import JobTitle

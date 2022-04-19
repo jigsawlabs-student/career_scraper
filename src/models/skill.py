@@ -8,6 +8,7 @@ class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    position_skills = relationship("PositionSkill", back_populates="skill")
 
     @classmethod
     def get_or_create(Klass, session, **kwargs):
@@ -23,3 +24,6 @@ class Skill(db.Model):
     @classmethod
     def find_by_name(self, name):
         return db.session.query(Skill).filter(Skill.name == name).all()
+
+
+# add skills

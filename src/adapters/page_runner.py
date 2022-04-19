@@ -14,7 +14,6 @@ class PageRunner():
             self.page_html = scraped_page.html
 
     def run(self, query = ''):
-        
         self.scraped_page.run()
         cards = self.build_cards_from_html()
         positions = self.build_positions_from(cards, query)
@@ -23,6 +22,7 @@ class PageRunner():
 
     def build_cards_from_html(self):
         html_cards = self.get_html_cards_from(self.scraped_page)
+        
         for html_card in html_cards:    
             card = Card.build_card_from(html_card)
             db.session.add(card)
@@ -32,14 +32,20 @@ class PageRunner():
     def build_positions_from(self, cards, query = ''):
         positions = []
         for card in cards:
-            builder = PositionBuilder(card)
-            position = builder.run()
-            position.query_string = query
-                
-            db.session.add(position)
+            position = self.build_position_from(card, query)
             positions.append(position)
         
         return positions
+
+    def build_position_from(self, card, query):
+        builder = PositionBuilder(card)
+        position = builder.run()
+        position.query_string = query
+        job_title = JobTitle.query.filter(JobTitle.name == query).first()
+        if job_title:
+            position.job_title = job_title
+        db.session.add(position)
+        return position
 
     def get_html_cards_from(self, page):
         cards = page.bs.findAll('a', id=re.compile('^job_'))

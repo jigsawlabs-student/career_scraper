@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 # read search terms from csv into a list
 
 
-
-
 def get_title_and_desc(card):
     id_string = card['data-jk']
     title = card.find('a', {'class': 'jobtitle'}).text[1:]

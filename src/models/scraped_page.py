@@ -22,10 +22,14 @@ class ScrapedPage(db.Model):
         self.set_current_page()
 
     def set_current_page(self):
-        text = self.bs.find('div', {'id': 'searchCountPages'}).text
-        page_num = re.findall(r'\d+', text)[0]
-        self.page_number = int(page_num)
-        return self.page_number
+        pages_div = self.bs.find('div', {'id': 'searchCountPages'})
+        if pages_div:
+            text = pages_div.text
+            page_num = re.findall(r'\d+', text)[0]
+            self.page_number = int(page_num)
+            return self.page_number
+        else:
+            pass
 
     
         

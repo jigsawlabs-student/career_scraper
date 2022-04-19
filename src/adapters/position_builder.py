@@ -17,6 +17,7 @@ class PositionBuilder:
         position = self.build_position()
         if not position.id:
             company = self.build_company()
+
             state = self.build_state()
             city = self.build_city()
             position.card = self.card
@@ -25,13 +26,13 @@ class PositionBuilder:
              state, self.card.remote)
             position.title = self.card.title
             position.description = self.card.description
-            position.date_posted = self.card.get_date_posted()
+            position.date_posted = self.card.date_posted
             
-            salaries = self.card.get_salaries()
+            salaries = self.card.salaries
             if salaries:
                 position.minimum_salary = salaries[0]
                 position.maximum_salary = salaries[-1]
-            experience_years = self.card.years_range()
+            experience_years = self.card.years
             if experience_years:
                 position.minimum_experience = experience_years[0]
                 position.maximum_experience = experience_years[-1]

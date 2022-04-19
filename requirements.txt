@@ -9,4 +9,5 @@ alembic>=1.7.6
 Flask-Migrate
 flask
 spacy
+dotenv
 en_core_web_sm

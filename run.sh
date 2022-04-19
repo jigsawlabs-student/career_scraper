@@ -1,0 +1,1 @@
+ python3 cli.py seed_skills

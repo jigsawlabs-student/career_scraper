@@ -2,9 +2,11 @@ import os
 from flask.cli import FlaskGroup
 import click
 from src import create_app, db
+from settings import DB_USER, DB_PASSWORD, DB_HOST, DB_PASSWORD
 
-dev_url = "postgresql://postgres:postgres@localhost/test_career_scraper"
-app = create_app(dev_url)
+db_url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/careers"
+
+app = create_app(db_url)
 
 cli = FlaskGroup(app)
 

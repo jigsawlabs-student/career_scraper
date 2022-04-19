@@ -1,0 +1,98 @@
+,skills
+0,
+1,fivetran
+2,meltano
+3,dbt
+4,mode
+5,looker
+6,dagster
+7,github
+8,gitlab
+9,stitch
+10,segment
+11,powerbi
+12,prefect
+13,databricks
+14,hightouch
+15,metabase
+16,elt
+17,census
+18,kubeflow
+19,amplitude
+20,mixpanel
+21,google analytics
+22,google studio
+23,heap
+24,scikit-learn
+25,rudderstack
+26,kotlin
+27,jenkins
+28,great expectations
+29,astronomer
+30,metaflow
+31,java
+32,spark
+33,superset
+34,s3
+35,lambda
+36,athena
+37,sagemaker
+38,cassandra
+39,datarobot
+40,sisense
+41,oracle
+42,graph ql
+43,mongodb
+44,django
+45,fastapi
+46,fast-api
+47,react
+48,redux
+49,sqlalchemy
+50,javascript
+51,ruby on rails
+52,golang
+53,couchdb
+54,solr
+55,rabbitmq
+56,redis
+57,tdd
+58,bdd
+59,agile
+60,scypy
+61,rdbms
+62,olap
+63,oltp
+64,nosql
+65,nlp
+66,demand forecasting
+67,and churn predictions
+68,performant
+69,dynamodb
+70,orchestrators
+71,luigi
+72,version control
+73,go
+74,idempotence
+75,partition
+76,serverless
+77,monitor
+78,data lake
+79,data warehouse
+80,jupyter
+81,pandas
+82,azure
+83,airbyte
+84,kaggle
+85,open source
+86,k8s
+87,hubspot
+88,churnzero
+89,seo
+90,instagram
+91,tiktok
+92,facebook
+93,twitter
+94,shopify
+95,heroku
+96,postgres
